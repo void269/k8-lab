@@ -168,3 +168,78 @@ resource "aws_instance" "k8_worker" {
 
   depends_on = [aws_instance.k8_manager]
 }
+
+// Joining the worker nodes to the Kubernetes cluster
+resource "terraform_data" "get_join_command" {
+  depends_on = [
+    aws_instance.k8_manager
+  ]
+
+  triggers_replace = [
+    aws_instance.k8_manager.id,
+    sha256(file("${path.module}/manager.sh.tftpl"))
+  ]
+
+  connection {
+    type = "ssh"
+    host = aws_instance.k8_manager.public_ip
+    user = var.username
+    private_key = file(pathexpand(var.ssh_key_path))
+    timeout = "15m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "while [ ! -f /var/tmp/k8-manager-ready ]; do echo 'Waiting for Kubernetes manager initialization...'; sleep 10; done",
+      "test -s /home/ubuntu/join.sh"
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      scp \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o ConnectTimeout=10 \
+        -i "${pathexpand(var.ssh_key_path)}" \
+        "${var.username}@${aws_instance.k8_manager.public_ip}:/home/ubuntu/join.sh" \
+        "${path.module}/join.sh"
+    EOT
+  }
+}
+
+resource "terraform_data" "join_workers" {
+  count = length(aws_instance.k8_worker)
+
+  depends_on = [
+    terraform_data.get_join_command,
+    aws_instance.k8_worker
+  ]
+
+  triggers_replace = [
+    aws_instance.k8_worker[count.index].id,
+    terraform_data.get_join_command.id
+  ]
+
+  connection {
+    type = "ssh"
+    host = aws_instance.k8_worker[count.index].public_ip
+    user = var.username
+    private_key = file(pathexpand(var.ssh_key_path))
+    timeout = "15m"
+  }
+
+  provisioner "file" {
+    source = "${path.module}/join.sh"
+    destination = "/tmp/join.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "while [ ! -f /var/tmp/k8-worker-ready ]; do echo 'Waiting for worker bootstrap...'; sleep 10; done",
+      "chmod 700 /tmp/join.sh",
+      "sudo /tmp/join.sh",
+      "touch /var/tmp/k8-worker-joined"
+    ]
+  }
+}
