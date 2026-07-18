@@ -45,13 +45,13 @@ variable "ami_image_id" {
 variable "ec2_instance_type_worker" {
   description = "EC2 Instance Type for Worker Nodes"
   type = string
-  default = "t2.micro"
+  default = "t2.medium"
 }
 
 variable "ec2_instance_type_manager" {
   description = "EC2 Instance Type for Manager Node"
   type = string
-  default = "t2.small"
+  default = "t2.medium"
 }
 
 /*
