@@ -147,7 +147,7 @@ resource "aws_instance" "ec2_k8_worker" {
   availability_zone = element(var.aws_az_list, 0)
   instance_type = var.ec2_instance_type
   key_name = var.ssh_key
-  vpc_security_group_ids = [aws_security_group.net_traffic.id]
+  vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
   user_data = templatefile("${path.module}/worker.sh.tftpl", {
