@@ -154,9 +154,8 @@ resource "aws_instance" "k8_worker" {
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
   user_data = templatefile("${path.module}/worker.sh.tftpl", {
-    manager_ip = aws_instance.k8_manager.private_ip
-    join_token = var.join_token
-    ca_hash    = var.ca_hash
+    kubernetes_version = var.k8_version
+    worker_name = "k8_worker-${count.index + 1}"
   })
 
   user_data_replace_on_change = true

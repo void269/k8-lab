@@ -82,7 +82,7 @@ variable "username" {
 variable "k8_version" {
   description = "Kubernetes Version"
   type = string
-  default = "1.36.2"
+  default = "1.36"
 }
 
 variable "pod_cidr" {
