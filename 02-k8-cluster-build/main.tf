@@ -66,10 +66,18 @@ resource "aws_route_table_association" "aws-rt" {
 }
 
 //Building the security group for the Kubernetes cluster EC2 instances
-resource "aws_security_group" "net_traffic" {
+resource "aws_security_group" "net_traffic_sg" {
   name = "net_traffic_sg"
   description = "Allow inbound/outbound traffic"
   vpc_id = aws_vpc.vpc01.id
+
+  ingress {
+    description = "Allow internal communication"
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [var.cidr_block]
+  }
 
   ingress {
     description = "SSH from anywhere"
@@ -80,13 +88,21 @@ resource "aws_security_group" "net_traffic" {
   }
 
   ingress {
+    description = "Allow pub access to k8 API"
+    from_port = 6443
+    to_port = 6443
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+/*
+  ingress {
     description = "HTTP from anywhere"
     from_port = 80
     to_port = 80
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+*/
   egress {
     description = "Allow all outbound traffic"
     from_port = 0
@@ -96,7 +112,7 @@ resource "aws_security_group" "net_traffic" {
   }
 
   tags = {
-    Name = "allow_network_traffic"
+    Name = "K8 Cluster SG"
     ENV = var.env
   }
 }
@@ -137,6 +153,4 @@ resource "aws_instance" "ec2_k8_worker" {
     Name = "k8_worker"
     ENV = var.env
   }
-
-  
 }
