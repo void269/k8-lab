@@ -128,7 +128,7 @@ resource "aws_instance" "ec2_k8_manager" {
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
   user_data = templatefile(
-    "${path.module}/scripts/manager.sh.tftpl",
+    "${path.module}/manager.sh.tftpl",
     {
       kubernetes_version = var.k8_version
       pod_cidr = var.pod_cidr
