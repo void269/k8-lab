@@ -121,7 +121,7 @@ resource "aws_security_group" "net_traffic_sg" {
 resource "aws_instance" "k8_manager" {
   ami = var.ami_image_id
   availability_zone = element(var.aws_az_list, 0)
-  instance_type = var.ec2_instance_type
+  instance_type = var.ec2_instance_type_manager
   key_name = var.ssh_key
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
@@ -148,7 +148,7 @@ resource "aws_instance" "k8_worker" {
   ami = var.ami_image_id
   count = 2
   availability_zone = element(var.aws_az_list, 0)
-  instance_type = var.ec2_instance_type
+  instance_type = var.ec2_instance_type_worker
   key_name = var.ssh_key
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id

@@ -42,11 +42,18 @@ variable "ami_image_id" {
   default = "ami-0b6d9d3d33ba97d99"
 }
 
-variable "ec2_instance_type" {
-  description = "EC2 Instance Type"
+variable "ec2_instance_type_worker" {
+  description = "EC2 Instance Type for Worker Nodes"
   type = string
   default = "t2.micro"
 }
+
+variable "ec2_instance_type_manager" {
+  description = "EC2 Instance Type for Manager Node"
+  type = string
+  default = "t2.small"
+}
+
 /*
 variable "access_key" {
   description = "IAM access key"
@@ -69,13 +76,13 @@ variable "ssh_key" {
 variable "ssh_key_path" {
   description = "Path to SSH key"
   type = string
-  default = "/home/ec2-user/.ssh/Demo-key-01.pem"
+  default = "P:\\Classes\\Perdue - Cloud DevOps\\Demo-key-01.pem"
 }
 
 variable "username" {
   description = "Username for SSH access to EC2 instances"
   type = string
-  default = "ec2-user"
+  default = "ubuntu"
 }
 
 // Kubernetes vars
