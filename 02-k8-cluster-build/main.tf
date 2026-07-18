@@ -196,15 +196,7 @@ resource "terraform_data" "get_join_command" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      scp \
-        -o StrictHostKeyChecking=no \
-        -o UserKnownHostsFile=/dev/null \
-        -o ConnectTimeout=10 \
-        -i "${pathexpand(var.ssh_key_path)}" \
-        "${var.username}@${aws_instance.k8_manager.public_ip}:/home/ubuntu/join.sh" \
-        "${path.module}/join.sh"
-    EOT
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -o ConnectTimeout=10 -i \"${var.ssh_key_path}\" \"ubuntu@${aws_instance.k8_manager.public_ip}:/home/ubuntu/join.sh\" \"${path.module}/join.sh\""
   }
 }
 
