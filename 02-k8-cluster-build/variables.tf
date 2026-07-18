@@ -68,12 +68,25 @@ variable "ssh_key" {
 
 variable "ssh_key_path" {
   description = "Path to SSH key"
-  type        = string
-  default     = "/home/ec2-user/.ssh/Demo-key-01.pem"
+  type = string
+  default = "/home/ec2-user/.ssh/Demo-key-01.pem"
 }
 
 variable "username" {
   description = "Username for SSH access to EC2 instances"
-  type        = string
-  default     = "ec2-user"
+  type = string
+  default = "ec2-user"
+}
+
+// Kubernetes vars
+variable "k8_version" {
+  description = "Kubernetes Version"
+  type = string
+  default = "1.36.2"
+}
+
+variable "pod_cidr" {
+  description = "Kubernetes Version"
+  type = string
+  default = "192.168.0.0/16"
 }

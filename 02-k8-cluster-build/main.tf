@@ -127,7 +127,13 @@ resource "aws_instance" "ec2_k8_manager" {
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
-  user_data = filebase64("user-data-k8-install.sh")
+  user_data = templatefile(
+    "${path.module}/scripts/manager.sh.tftpl",
+    {
+      kubernetes_version = var.k8_version
+      pod_cidr = var.pod_cidr
+    }
+  )
 
   tags = {
     Name = "k8_manager"
@@ -144,7 +150,11 @@ resource "aws_instance" "ec2_k8_worker" {
   vpc_security_group_ids = [aws_security_group.net_traffic.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
-  user_data = filebase64("user-data-k8-install.sh")
+  user_data = templatefile("${path.module}/worker.sh.tftpl", {
+    manager_ip = aws_instance.k8_manager.private_ip
+    join_token = var.join_token
+    ca_hash    = var.ca_hash
+  })
 
   tags = {
     Name = "k8_worker"

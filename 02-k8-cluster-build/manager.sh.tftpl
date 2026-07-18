@@ -1,0 +1,120 @@
+#!/bin/bash
+
+set -euxo pipefail
+exec > >(tee /var/log/k8-manager-install.log)
+exec 2>&1
+
+K8S_VERSION="${kubernetes_version}"
+POD_CIDR="${pod_cidr}"
+
+################
+# Disable swap #
+################
+
+swapoff -a
+sed -i '/ swap / s/^/#/' /etc/fstab
+
+#######################
+# Load kernel modules #
+#######################
+
+cat <<EOF >/etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+modprobe overlay
+modprobe br_netfilter
+
+##########
+# Sysctl #
+##########
+
+cat <<EOF >/etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables=1
+net.bridge.bridge-nf-call-ip6tables=1
+net.ipv4.ip_forward=1
+EOF
+
+sysctl --system
+
+####################
+# Install packages #
+####################
+
+apt-get update
+apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gpg \
+    containerd
+
+########################
+# Configure containerd #
+########################
+
+mkdir -p /etc/containerd
+containerd config default >/etc/containerd/config.toml
+sed -i \
+'s/SystemdCgroup = false/SystemdCgroup = true/' \
+/etc/containerd/config.toml
+systemctl enable containerd
+systemctl restart containerd
+
+#########################
+# Kubernetes repository #
+#########################
+
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v${K8S_VERSION}/deb/Release.key \
+| gpg --dearmor \
+-o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${K8S_VERSION}/deb/ /" \
+>/etc/apt/sources.list.d/kubernetes.list
+
+apt-get update
+apt-get install -y \
+    kubelet \
+    kubeadm \
+    kubectl
+apt-mark hold \
+    kubelet \
+    kubeadm \
+    kubectl
+systemctl enable kubelet
+
+######################
+# Initialize cluster #
+######################
+
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+
+kubeadm init \
+    --apiserver-advertise-address=${PRIVATE_IP} \
+    --pod-network-cidr=${POD_CIDR}
+
+#####################
+# Configure kubectl #
+#####################
+
+mkdir -p /home/ubuntu/.kube
+cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+chown ubuntu:ubuntu /home/ubuntu/.kube/config
+
+##################
+# Install Calico #
+##################
+
+sudo -u ubuntu kubectl apply \
+-f https://raw.githubusercontent.com/projectcalico/calico/v3.31.0/manifests/calico.yaml
+
+#####################
+# Save join command #
+#####################
+
+kubeadm token create --print-join-command \
+>/home/ubuntu/join.sh
+chmod +x /home/ubuntu/join.sh
+chown ubuntu:ubuntu /home/ubuntu/join.sh
