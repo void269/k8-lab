@@ -76,7 +76,7 @@ variable "ssh_key" {
 variable "ssh_key_path" {
   description = "Path to SSH key"
   type = string
-  default = "P:\\Classes\\Perdue - Cloud DevOps\\Demo-key-01.pem"
+  default = "C:\\github\\k8-lab\\02-k8-cluster-build\\Demo-key-01.pem"
 }
 
 variable "username" {
