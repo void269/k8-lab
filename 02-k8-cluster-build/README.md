@@ -39,9 +39,8 @@ Terraform and kubeadm.
 ## Deploy
 
 ``` bash
-terraform init
-terraform plan
-terraform apply
+./build.sh
+./run.sh
 ```
 
 ## Verify
@@ -61,7 +60,7 @@ k8-worker-2
 ## Destroy
 
 ``` bash
-terraform destroy
+./destroy.sh
 ```
 
 ## Troubleshooting
