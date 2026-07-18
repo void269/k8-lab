@@ -41,7 +41,6 @@ resource "aws_subnet" "private" {
     Name = "Private Subnet ${count.index + 1}"
     ENV = var.env
   }
-
 }
 
 //Building the route table and associating it with the public subnets
@@ -125,7 +124,7 @@ resource "aws_instance" "ec2_k8_manager" {
   availability_zone = element(var.aws_az_list, 0)
   instance_type = var.ec2_instance_type
   key_name = var.ssh_key
-  vpc_security_group_ids = [aws_security_group.net_traffic.id]
+  vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
   user_data = filebase64("user-data-k8-install.sh")
@@ -134,8 +133,6 @@ resource "aws_instance" "ec2_k8_manager" {
     Name = "k8_manager"
     ENV = var.env
   }
-
-  
 }
 
 resource "aws_instance" "ec2_k8_worker" {
