@@ -127,6 +127,7 @@ resource "aws_instance" "ec2_k8_manager" {
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
+
   user_data = templatefile(
     "${path.module}/manager.sh.tftpl",
     {
@@ -135,9 +136,12 @@ resource "aws_instance" "ec2_k8_manager" {
     }
   )
 
+  user_data_replace_on_change = true
+
   tags = {
     Name = "k8_manager"
     ENV = var.env
+    Role = "manager"
   }
 }
 
@@ -156,8 +160,13 @@ resource "aws_instance" "ec2_k8_worker" {
     ca_hash    = var.ca_hash
   })
 
+  user_data_replace_on_change = true
+
   tags = {
     Name = "k8_worker"
     ENV = var.env
+    Role = "worker"
   }
+
+  depends_on = [aws_instance.ec2_k8_manager]
 }
