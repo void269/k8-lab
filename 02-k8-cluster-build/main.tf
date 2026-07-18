@@ -44,6 +44,7 @@ resource "aws_subnet" "private" {
 
 }
 
+//Building the route table and associating it with the public subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.vpc01.id
 
@@ -64,6 +65,43 @@ resource "aws_route_table_association" "aws-rt" {
   route_table_id = aws_route_table.public.id
 }
 
+//Building the security group for the Kubernetes cluster EC2 instances
+resource "aws_security_group" "net_traffic" {
+  name = "net_traffic_sg"
+  description = "Allow inbound/outbound traffic"
+  vpc_id = aws_vpc.vpc01.id
+
+  ingress {
+    description = "SSH from anywhere"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTP from anywhere"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_network_traffic"
+    ENV = var.env
+  }
+}
+
+
 //Deploying the Kubernetes cluster EC2 instances
 resource "aws_instance" "ec2_k8_manager" {
   ami = var.ami_image_id
@@ -72,12 +110,31 @@ resource "aws_instance" "ec2_k8_manager" {
   instance_type = var.ec2_instance_type
   key_name = var.ssh_key
   vpc_security_group_ids = [aws_security_group.net_traffic.id]
-  subnet_id = aws_subnet.private[0].id
-  associate_public_ip_address = false
+  subnet_id = aws_subnet.public[0].id
+  associate_public_ip_address = true
   user_data = filebase64("user-data-k8-install.sh")
 
   tags = {
     Name = "k8_manager"
+    ENV = var.env
+  }
+
+  
+}
+
+resource "aws_instance" "ec2_k8_worker" {
+  ami = var.ami_image_id
+  count = 2
+  availability_zone = element(var.aws_az_list, 0)
+  instance_type = var.ec2_instance_type
+  key_name = var.ssh_key
+  vpc_security_group_ids = [aws_security_group.net_traffic.id]
+  subnet_id = aws_subnet.public[0].id
+  associate_public_ip_address = true
+  user_data = filebase64("user-data-k8-install.sh")
+
+  tags = {
+    Name = "k8_worker"
     ENV = var.env
   }
 

@@ -24,12 +24,6 @@ variable "aws_az_list" {
 }
 
 //EC2 Vars
-variable "http_port" {
-  description = "SG Inbound port number"
-  type = number
-  default = 80
-}
-
 variable "aws_region" {
   description = "AWS Region"
   type = string
@@ -39,7 +33,7 @@ variable "aws_region" {
 variable "env" {
   description = "Environment"
   type = string
-  default = "lab"
+  default = "test1"
 }
 
 variable "ami_image_id" {
