@@ -126,14 +126,6 @@ apt-mark hold \
 
 systemctl enable kubelet
 
-###########################################
-# Confirm required commands are available #
-###########################################
-
-containerd --version
-kubeadm version
-kubelet --version
-
 ############################################
 # Signal Terraform that bootstrap finished #
 ############################################
@@ -141,4 +133,4 @@ kubelet --version
 touch /var/tmp/k8-worker-ready
 
 echo "Worker bootstrap completed successfully."
-echo "Waiting for Terraform to execute kubeadm join."
+echo "Ready for Terraform to execute kubeadm join."
