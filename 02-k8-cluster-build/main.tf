@@ -74,6 +74,7 @@ resource "aws_instance" "ec2_k8_manager" {
   vpc_security_group_ids = [aws_security_group.net_traffic.id]
   subnet_id = aws_subnet.private[0].id
   associate_public_ip_address = false
+  user_data = filebase64("user-data-k8-install.sh")
 
   tags = {
     Name = "k8_manager"
