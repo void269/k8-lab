@@ -118,9 +118,8 @@ resource "aws_security_group" "net_traffic_sg" {
 
 
 //Deploying the Kubernetes cluster EC2 instances
-resource "aws_instance" "ec2_k8_manager" {
+resource "aws_instance" "k8_manager" {
   ami = var.ami_image_id
-  count = 1
   availability_zone = element(var.aws_az_list, 0)
   instance_type = var.ec2_instance_type
   key_name = var.ssh_key
@@ -145,7 +144,7 @@ resource "aws_instance" "ec2_k8_manager" {
   }
 }
 
-resource "aws_instance" "ec2_k8_worker" {
+resource "aws_instance" "k8_worker" {
   ami = var.ami_image_id
   count = 2
   availability_zone = element(var.aws_az_list, 0)
@@ -168,5 +167,5 @@ resource "aws_instance" "ec2_k8_worker" {
     Role = "worker"
   }
 
-  depends_on = [aws_instance.ec2_k8_manager]
+  depends_on = [aws_instance.k8_manager]
 }
