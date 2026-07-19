@@ -54,7 +54,7 @@ variable "ec2_instance_type_manager" {
   default = "t2.medium"
 }
 
-/*
+
 variable "access_key" {
   description = "IAM access key"
   type = string
@@ -66,7 +66,7 @@ variable "secret_key" {
   type = string
   sensitive = true
 }
-*/
+
 variable "ssh_key" {
   description = "SSH Key to access EC2 instances"
   type = string
