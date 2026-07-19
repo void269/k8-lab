@@ -118,17 +118,17 @@ resource "aws_security_group" "net_traffic_sg" {
 
 
 //Deploying the Kubernetes cluster EC2 instances
-resource "aws_instance" "k8_manager" {
+resource "aws_instance" "k8_control_plane" {
   ami = var.ami_image_id
   availability_zone = element(var.aws_az_list, 0)
-  instance_type = var.ec2_instance_type_manager
+  instance_type = var.ec2_instance_type_control_plane
   key_name = var.ssh_key
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
 
   user_data = templatefile(
-    "${path.module}/manager.sh.tftpl",
+    "${path.module}/control-plane.sh.tftpl",
     {
       kubernetes_version = var.k8_version
       pod_cidr = var.pod_cidr
@@ -138,9 +138,9 @@ resource "aws_instance" "k8_manager" {
   user_data_replace_on_change = true
 
   tags = {
-    Name = "k8_manager"
+    Name = "k8_control_plane"
     ENV = var.env
-    Role = "manager"
+    Role = "control-plane"
   }
 }
 
@@ -166,23 +166,23 @@ resource "aws_instance" "k8_worker" {
     Role = "worker"
   }
 
-  depends_on = [aws_instance.k8_manager]
+  depends_on = [aws_instance.k8_control_plane]
 }
 
 // Joining the worker nodes to the Kubernetes cluster
 resource "terraform_data" "get_join_command" {
   depends_on = [
-    aws_instance.k8_manager
+    aws_instance.k8_control_plane
   ]
 
   triggers_replace = [
-    aws_instance.k8_manager.id,
-    sha256(file("${path.module}/manager.sh.tftpl"))
+    aws_instance.k8_control_plane.id,
+    sha256(file("${path.module}/control-plane.sh.tftpl"))
   ]
 
   connection {
     type = "ssh"
-    host = aws_instance.k8_manager.public_ip
+    host = aws_instance.k8_control_plane.public_ip
     user = var.username
     private_key = file(pathexpand(var.ssh_key_path))
     timeout = "15m"
@@ -190,14 +190,14 @@ resource "terraform_data" "get_join_command" {
 
   provisioner "remote-exec" {
     inline = [
-      "while [ ! -f /var/tmp/k8-manager-ready ]; do echo 'Waiting for Kubernetes manager initialization...'; sleep 10; done",
+      "while [ ! -f /var/tmp/k8-control-plane-ready ]; do echo 'Waiting for Kubernetes control plane initialization...'; sleep 10; done",
       "test -s /home/ubuntu/join.sh"
     ]
   }
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -o ConnectTimeout=10 -i \"${var.ssh_key_path}\" \"ubuntu@${aws_instance.k8_manager.public_ip}:/home/ubuntu/join.sh\" \"${path.module}/join.sh\""
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -o ConnectTimeout=10 -i \"${var.ssh_key_path}\" \"ubuntu@${aws_instance.k8_control_plane.public_ip}:/home/ubuntu/join.sh\" \"${path.module}/join.sh\""
   }
 }
 

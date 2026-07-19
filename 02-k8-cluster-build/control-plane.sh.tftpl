@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euxo pipefail
-exec > >(tee /var/log/k8-manager-install.log)
+exec > >(tee /var/log/k8-control-plane-install.log)
 exec 2>&1
 
 K8S_VERSION="${kubernetes_version}"
@@ -119,4 +119,4 @@ kubeadm token create --print-join-command \
 chmod +x /home/ubuntu/join.sh
 chown ubuntu:ubuntu /home/ubuntu/join.sh
 
-touch /var/tmp/k8-manager-ready
+touch /var/tmp/k8-control-plane-ready

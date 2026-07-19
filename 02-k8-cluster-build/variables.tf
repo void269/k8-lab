@@ -48,13 +48,13 @@ variable "ec2_instance_type_worker" {
   default = "t2.medium"
 }
 
-variable "ec2_instance_type_manager" {
-  description = "EC2 Instance Type for Manager Node"
+variable "ec2_instance_type_control_plane" {
+  description = "EC2 Instance Type for Control Plane Node"
   type = string
   default = "t2.medium"
 }
 
-
+/*
 variable "access_key" {
   description = "IAM access key"
   type = string
@@ -66,7 +66,7 @@ variable "secret_key" {
   type = string
   sensitive = true
 }
-
+*/
 variable "ssh_key" {
   description = "SSH Key to access EC2 instances"
   type = string
@@ -76,7 +76,7 @@ variable "ssh_key" {
 variable "ssh_key_path" {
   description = "Path to SSH key"
   type = string
-  default = "C:\\github\\k8-lab\\02-k8-cluster-build\\Demo-key-01.pem"
+  default = "P:\\Classes\\Perdue - Cloud DevOps\\Demo-key-01.pem"
 }
 
 variable "username" {
