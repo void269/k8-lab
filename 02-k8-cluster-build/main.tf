@@ -128,7 +128,7 @@ resource "aws_instance" "k8_control_plane" {
   associate_public_ip_address = true
 
   user_data = templatefile(
-    "${path.module}/control-plane-user-data.sh",
+    "${path.module}/control-plane-user-data.sh.tftpl",
     {
       kubernetes_version = var.k8_version
       pod_cidr = var.pod_cidr
@@ -153,7 +153,7 @@ resource "aws_instance" "k8_worker" {
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
-  user_data = templatefile("${path.module}/worker-user-data.sh", {
+  user_data = templatefile("${path.module}/worker-user-data.sh.tftpl", {
     kubernetes_version = var.k8_version
     worker_name = "k8_worker-${count.index + 1}"
   })
@@ -177,7 +177,7 @@ resource "terraform_data" "get_join_command" {
 
   triggers_replace = [
     aws_instance.k8_control_plane.id,
-    sha256(file("${path.module}/control-plane.sh.tftpl"))
+    sha256(file("${path.module}/control-plane-user-data.sh.tftpl"))
   ]
 
   connection {
