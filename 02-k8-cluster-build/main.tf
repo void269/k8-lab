@@ -128,7 +128,7 @@ resource "aws_instance" "k8_control_plane" {
   associate_public_ip_address = true
 
   user_data = templatefile(
-    "${path.module}/control-plane.sh.tftpl",
+    "${path.module}/control-plane-user-data.sh",
     {
       kubernetes_version = var.k8_version
       pod_cidr = var.pod_cidr
@@ -153,7 +153,7 @@ resource "aws_instance" "k8_worker" {
   vpc_security_group_ids = [aws_security_group.net_traffic_sg.id]
   subnet_id = aws_subnet.public[0].id
   associate_public_ip_address = true
-  user_data = templatefile("${path.module}/worker.sh.tftpl", {
+  user_data = templatefile("${path.module}/worker-user-data.sh", {
     kubernetes_version = var.k8_version
     worker_name = "k8_worker-${count.index + 1}"
   })
