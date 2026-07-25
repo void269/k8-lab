@@ -47,3 +47,5 @@ access.txt
 plan.out
 *.pem
 *.tfvars
+join.sh
+NULL
