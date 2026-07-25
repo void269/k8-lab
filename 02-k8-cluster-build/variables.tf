@@ -33,7 +33,7 @@ variable "aws_region" {
 variable "env" {
   description = "Environment"
   type = string
-  default = "test1"
+  default = "LAB"
 }
 
 variable "ami_image_id" {
@@ -54,7 +54,6 @@ variable "ec2_instance_type_control_plane" {
   default = "t3.medium"
 }
 
-/*
 variable "access_key" {
   description = "IAM access key"
   type = string
@@ -66,17 +65,15 @@ variable "secret_key" {
   type = string
   sensitive = true
 }
-*/
+
 variable "ssh_key" {
   description = "SSH Key to access EC2 instances"
   type = string
-  default = "Demo-key-01"
 }
 
 variable "ssh_key_path" {
   description = "Path to SSH key"
   type = string
-  default = "P:\\Classes\\Perdue - Cloud DevOps\\Demo-key-01.pem"
 }
 
 variable "username" {
