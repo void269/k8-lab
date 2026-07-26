@@ -116,7 +116,6 @@ resource "aws_security_group" "net_traffic_sg" {
   }
 }
 
-
 //Deploying the Kubernetes cluster EC2 instances
 resource "aws_instance" "k8_control_plane" {
   ami = var.ami_image_id

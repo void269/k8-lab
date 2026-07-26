@@ -1,11 +1,11 @@
-output "manager_public_ip" {
+output "control_plane_public_ip" {
   description = "Public IP address of the Kubernetes control plane"
-  value       = aws_instance.k8_manager.public_ip
+  value       = aws_instance.k8_control_plane.public_ip
 }
 
-output "manager_ssh_command" {
+output "control_plane_ssh_command" {
   description = "SSH command for connecting to the Kubernetes control plane"
-  value       = "ssh -i \"${var.ssh_key_path}\" ${var.username}@${aws_instance.k8_manager.public_ip}"
+  value       = "ssh -i \"${var.ssh_key_path}\" ${var.username}@${aws_instance.k8_control_plane.public_ip}"
 }
 
 output "worker_public_ips" {

@@ -48,4 +48,4 @@ plan.out
 *.pem
 *.tfvars
 join.sh
-NULL
+NUL
