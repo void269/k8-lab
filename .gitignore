@@ -46,6 +46,5 @@ terraform.rc
 access.txt
 plan.out
 *.pem
-*.tfvars
 join.sh
 NUL
